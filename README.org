@@ -1,0 +1,49 @@
+#+title: Gateway-api Test Framework
+
+
+* Goal
+
+To provide a common framework to test different [[https://gateway-api.sigs.k8s.io/][gateway-api]] implementations with [[https://kind.sigs.k8s.io/][kind]].
+The framework will deploy [[https://metallb.universe.tf/][metallb]] as a load balancer.
+
+* Configure
+
+Override the following environment variables if the defaults don't match your requirements.
+
+#+begin_example
+GATEWAY_API_VERSION="v1.0.0"
+KIND_IMAGE="kindest/node:v1.30.0@sha256:047357ac0cfea04663786a612ba1eaba9702bef25227a794b52890dd8bcd692e"
+KIND_NET="kind"
+#+end_example
+
+* Test implementations
+
+Use the following commands to test a gateway-api implementation.
+
+** cilium
+
+#+begin_src tmux :session gtw-api:cilium
+export CONFIG_DIR=${PWD}/config
+export IMPLEMENTATION=cilium ; ./deploy-kind-gtw-api-cluster.sh
+#+end_src
+
+** contour
+
+#+begin_src tmux :session gtw-api:contour
+export CONFIG_DIR=${PWD}/config
+export IMPLEMENTATION=contour ; ./deploy-kind-gtw-api-cluster.sh
+#+end_src
+
+** envoy-gateway
+
+#+begin_src tmux :session gtw-api:envoy-gateway
+export CONFIG_DIR=${PWD}/config
+export IMPLEMENTATION=envoy-gateway ; ./deploy-kind-gtw-api-cluster.sh
+#+end_src
+
+** istio
+
+#+begin_src tmux :session gtw-api:istio
+export CONFIG_DIR=${PWD}/config
+export IMPLEMENTATION=istio ; ./deploy-kind-gtw-api-cluster.sh
+#+end_src
