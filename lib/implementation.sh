@@ -22,13 +22,19 @@ config::implementation() {
       deploy::istio
       ;;
 
+    "none")
+      echo "No gateway-api implementation requested."
+      ;;
+
     *)
       echo "Error: Implementation unknown, exiting"
       exit 1
       ;;
   esac
 
-  kubectl get gc
-  GTWCLASS_NAME=$(kubectl get gc -ojsonpath='{.items[0].metadata.name}')
-  kubectl get gc $GTWCLASS_NAME -ojsonpath='{.status}' | jq
+  if [[ ${IMPLEMENTATION} != "none" ]] ; then
+    kubectl get gc
+    GTWCLASS_NAME=$(kubectl get gc -ojsonpath='{.items[0].metadata.name}')
+    kubectl get gc $GTWCLASS_NAME -ojsonpath='{.status}' | jq
+  fi
 }

@@ -47,3 +47,12 @@ export IMPLEMENTATION=envoy-gateway ; ./deploy-kind-gtw-api-cluster.sh
 export CONFIG_DIR=${PWD}/config
 export IMPLEMENTATION=istio ; ./deploy-kind-gtw-api-cluster.sh
 #+end_src
+
+* Want to test another implementation?
+
+Use the following instructions to launch a clean environment that includes [[https://metallb.universe.tf/][metallb]] as a load balancer.
+
+#+begin_src tmux :session gtw-api:istio
+export CONFIG_DIR=${PWD}/config
+export IMPLEMENTATION=none ; ./deploy-kind-gtw-api-cluster.sh
+#+end_src
