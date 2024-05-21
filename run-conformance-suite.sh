@@ -14,6 +14,7 @@ if [[ "${IMPLEMENTATION}" == "none" ]] ; then
 fi
 
 export IMPLEMENTATION_REPO_PATH=${IMPLEMENTATION_REPO_PATH:-"${PWD}/repos/${IMPLEMENTATION}"}
+export GATEWAY_API_VERSION=${GATEWAY_API_VERSION:-"v1.0.0"}
 source "./lib/init.sh"
 
 run::${IMPLEMENTATION}::conformance
