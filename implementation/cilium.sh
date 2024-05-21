@@ -27,3 +27,42 @@ spec:
 EOF
 
 }
+
+run::cilium::conformance() {
+  echo "run::cilium::conformance"
+
+  if [[ ! -d ${IMPLEMENTATION_REPO_PATH} ]]; then
+    echo "IMPLEMENTATION_REPO_PATH: ${IMPLEMENTATION_REPO_PATH}"
+    echo "Repo for \"${IMPLEMENTATION}\" doesn't exists, cloning repo"
+
+    mkdir -p repos
+    cd $_ || exit
+    git clone https://github.com/cilium/cilium.git
+    cd - || exit
+  fi
+  pushd repos/cilium || exit 1
+
+  SUPPORTED_FEATURES="Gateway,HTTPRoute,HTTPRouteDestinationPortMatching,HTTPRouteHostRewrite,HTTPRouteMethodMatching,HTTPRoutePathRedirect,HTTPRoutePathRewrite,HTTPRoutePortRedirect,HTTPRouteQueryParamMatching,HTTPRouteRequestMirror,HTTPRouteRequestMultipleMirrors,HTTPRouteResponseHeaderModification,HTTPRouteSchemeRedirect,ReferenceGrant,TLSRoute"
+  SKIP_TESTS=""
+  CURRENT_DATE_TIME=$(date +"%Y%m%d-%H%M")
+  REPORT="/tmp/conformance-suite-report-${CURRENT_DATE_TIME}-cilium.log"
+
+  GATEWAY_API_CONFORMANCE_TESTS=1 go test \
+    -p 4 \
+    -v ./operator/pkg/gateway-api \
+    --gateway-class cilium \
+    --supported-features "${SUPPORTED_FEATURES}" \
+    --report-output=${REPORT} \
+    --organization=cilium \
+    --project=cilium \
+    --url=https://github.com/cilium/cilium \
+    --version=0.15.4 \
+    --contact='https://github.com/cilium/community/blob/main/roles/Maintainers.md' \
+    -test.run "TestConformance" \
+    -test.skip "${SKIP_TESTS}"
+
+  popd || exit
+
+  echo -e "\n\nConformance Suite completed.\n${IMPLEMENTATION} report saved: ${REPORT}.\n\n"
+  cat "${REPORT}"
+}
