@@ -11,7 +11,7 @@ The framework will deploy [[https://metallb.universe.tf/][metallb]] as a load ba
 Override the following environment variables if the defaults don't match your requirements.
 
 #+begin_example
-GATEWAY_API_VERSION="v1.0.0"
+GATEWAY_API_VERSION="v1.1.0"
 GATEWAY_API_CHANNEL="standard"
 KIND_IMAGE="kindest/node:v1.30.0@sha256:047357ac0cfea04663786a612ba1eaba9702bef25227a794b52890dd8bcd692e"
 KIND_NET="kind"
