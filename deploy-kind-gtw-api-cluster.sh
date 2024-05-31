@@ -20,6 +20,10 @@ export KIND_NET=${KIND_NET:-"kind"}
 export KIND_DISABLE_CNI=${KIND_DISABLE_CNI:-"false"}
 export KIND_DISABLE_CNI=${KIND_DISABLE_CNI,,}
 
+export ENABLE_APISNOOP=${ENABLE_APISNOOP:-"false"}
+export ENABLE_APISNOOP=${ENABLE_APISNOOP,,}
+echo "ENABLE_APISNOOP: ${ENABLE_APISNOOP}"
+
 echo "CONFIG_DIR: ${CONFIG_DIR}"
 
 source "./lib/init.sh"

@@ -6,10 +6,9 @@ deploy::kind() {
   echo "deploy::kind"
   config::kind::config
 
-  # ERROR: failed to create cluster: node(s) already exist for a cluster with the name "kind"
-  # ^^^ Check
-
+  cd $(dirname ${KIND_CONFIG}) || exit
   kind create cluster --config=${KIND_CONFIG} --image=${KIND_IMAGE}
+  cd - || exit
 }
 
 
@@ -18,12 +17,8 @@ config::kind::config() {
   echo "KIND_DISABLE_CNI: ${KIND_DISABLE_CNI}"
   case ${KIND_DISABLE_CNI} in
 
-    "true")
-      export KIND_CONFIG=${CONFIG_DIR}/kind-cni-disable.yaml
-      ;;
-
-    "false")
-      export KIND_CONFIG=${CONFIG_DIR}/kind-cni-enable.yaml
+    "true" | "false")
+      config::kind::${ENABLE_APISNOOP}::${KIND_DISABLE_CNI}
       ;;
 
     *)
@@ -32,7 +27,25 @@ config::kind::config() {
       ;;
   esac
 
+  echo "KIND_CONFIG: ${KIND_CONFIG}"
   echo "KIND_IMAGE: ${KIND_IMAGE}"
+}
+
+# config::kind::ENABLE_APISNOOP::KIND_DISABLE_CNI
+config::kind::false::false() {
+      export KIND_CONFIG=${CONFIG_DIR}/kind-cni-enable.yaml
+}
+
+config::kind::false::true() {
+      export KIND_CONFIG=${CONFIG_DIR}/kind-cni-disable.yaml
+}
+
+config::kind::true::false() {
+      export KIND_CONFIG=${CONFIG_DIR}/kind-apisnoop-cni-enable.yaml
+}
+
+config::kind::true::true() {
+      export KIND_CONFIG=${CONFIG_DIR}/kind-apisnoop-cni-disable.yaml
 }
 
 check::kind::cni() {
