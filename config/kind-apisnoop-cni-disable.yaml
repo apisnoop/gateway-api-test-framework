@@ -1,0 +1,28 @@
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+kubeadmConfigPatches:
+  - |
+    apiVersion: kubeadm.k8s.io/v1beta3
+    kind: ClusterConfiguration
+    metadata:
+      name: config
+    apiServer:
+      extraArgs:
+        "audit-webhook-config-file": "/etc/kubernetes/pki/audit/sink.yaml"
+        "audit-policy-file": "/etc/kubernetes/pki/audit/policy.yaml"
+networking:
+  # the default CNI will not be installed
+  disableDefaultCNI: true
+nodes:
+  - role: control-plane
+    extraMounts:
+      - hostPath: audit
+        containerPath: /etc/kubernetes/pki/audit
+        readOnly: True
+      - hostPath: manifests/apisnoop.yaml
+        containerPath: /etc/kubernetes/manifests/apisnoop.yaml
+        readOnly: True
+    extraPortMappings:
+      - containerPort: 5432
+        hostPort: 5432
+  - role: worker
