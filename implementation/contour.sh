@@ -14,7 +14,7 @@ deploy::contour() {
   kubectl apply -f https://raw.githubusercontent.com/projectcontour/contour/${CONTOUR_VERSION}/examples/gateway-provisioner/01-roles.yaml
   kubectl apply -f https://raw.githubusercontent.com/projectcontour/contour/${CONTOUR_VERSION}/examples/gateway-provisioner/02-rolebindings.yaml
 
-  kubectl apply -f <(curl -s https://raw.githubusercontent.com/projectcontour/contour/main/examples/gateway-provisioner/03-gateway-provisioner.yaml | \
+  kubectl apply -f <(curl -s https://raw.githubusercontent.com/projectcontour/contour/${CONTOUR_VERSION}/examples/gateway-provisioner/03-gateway-provisioner.yaml | \
       yq eval '.spec.template.spec.containers[0].image = env(CONTOUR_IMG)' - | \
       yq eval '.spec.template.spec.containers[0].imagePullPolicy = "IfNotPresent"' - | \
       yq eval '.spec.template.spec.containers[0].args += "--contour-image="+env(CONTOUR_IMG)' -)
