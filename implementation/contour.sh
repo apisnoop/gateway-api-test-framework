@@ -19,6 +19,7 @@ deploy::contour() {
       yq eval '.spec.template.spec.containers[0].imagePullPolicy = "IfNotPresent"' - | \
       yq eval '.spec.template.spec.containers[0].args += "--contour-image="+env(CONTOUR_IMG)' -)
 
+  kubectl apply -f https://raw.githubusercontent.com/projectcontour/contour/v1.29.0/examples/contour/01-crds.yaml
   kubectl -n projectcontour wait --for=condition=Ready --selector="control-plane=contour-gateway-provisioner" --timeout=180s pod
 
   cat << EOF | kubectl apply -f -
