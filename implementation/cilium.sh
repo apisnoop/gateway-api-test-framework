@@ -47,9 +47,8 @@ run::cilium::conformance() {
   CURRENT_DATE_TIME=$(date +"%Y%m%d-%H%M")
   REPORT="/tmp/conformance-suite-report-${CURRENT_DATE_TIME}-cilium.log"
 
-  GATEWAY_API_CONFORMANCE_TESTS=1 go test \
-    -p 4 \
-    -v ./operator/pkg/gateway-api \
+  GOOS=linux go test -c ./operator/pkg/gateway-api/
+  podman machine ssh env GATEWAY_API_CONFORMANCE_TESTS=1 KUBECONFIG="$HOME/.kube/config" "$PWD"/gateway-api.test \
     --gateway-class cilium \
     --supported-features "${SUPPORTED_FEATURES}" \
     --report-output=${REPORT} \
@@ -59,7 +58,7 @@ run::cilium::conformance() {
     --version=0.15.4 \
     --contact='https://github.com/cilium/community/blob/main/roles/Maintainers.md' \
     -test.run "TestConformance" \
-    -test.skip "${SKIP_TESTS}"
+    -test.v 10
 
   popd || exit
 
