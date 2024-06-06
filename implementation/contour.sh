@@ -33,6 +33,11 @@ EOF
 
 }
 
+run::contour::conformance() {
+  echo "run::contour::conformance"
+  run::contour::gateway-api-conformance
+}
+
 run::contour::gateway-api-conformance() {
   echo "run::contour::gateway-api-conformance"
 
