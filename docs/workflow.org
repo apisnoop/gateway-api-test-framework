@@ -1,0 +1,87 @@
+#+title: Gateway-API Test Framework
+
+
+-----
+
+* Workflow
+
+Reminder: Make sure that the implementation references match the one you are wanting to test
+
+** Create tmux session
+
+#+begin_example
+tmux new -s tmp-gtw
+#+end_example
+
+** boot local test framework from ~/tmp/gtwfrwk-${IMPLEMENTATION}~
+
+#+begin_src tmux :session tmp-gtw:contour :results none
+export IMPLEMENTATION="contour"
+export GATEWAY_API_VERSION="v1.0.0"
+export ENABLE_APISNOOP=true
+
+export REPO="https://github.com/apisnoop/gateway-api-test-framework"
+export BRANCH="main"
+
+cd /tmp
+git clone --single-branch --branch ${BRANCH} ${REPO} gtwfrwk-${IMPLEMENTATION}
+cd gtwfrwk-${IMPLEMENTATION}
+git remote -v
+git branch
+
+export CONFIG_DIR=${PWD}/config
+./deploy-kind-gtw-api-cluster.sh
+#+end_src
+
+** Check cluster
+*** nodes
+
+#+begin_src tmux :session tmp-gtw:contour :results none
+kubectl get nodes -owide
+#+end_src
+
+*** pods
+
+#+begin_src tmux :session tmp-gtw:contour :results none
+kubectl get pods -A
+#+end_src
+
+*** services
+
+#+begin_src tmux :session tmp-gtw:contour :results none
+kubectl get services -A
+#+end_src
+
+*** metallb
+
+#+begin_src tmux :session tmp-gtw:contour :results none
+kubectl -n metallb -n metallb-system get cm metallb -oyaml | head
+#+end_src
+
+** Run conformance tests
+
+#+begin_src tmux :session tmp-gtw:contour :results none
+./run-conformance-suite.sh
+#+end_src
+
+** Check apisnoop events
+*** distinct useragents
+
+#+begin_src tmux :session tmp-gtw:contour :results none
+export PGUSER=apisnoop ; export PGHOST=localhost
+psql -c "select distinct useragent from testing.audit_event;"
+#+end_src
+
+*** filter distinct useragent
+
+#+begin_src tmux :session tmp-gtw:contour :results none
+export PGUSER=apisnoop ; export PGHOST=localhost
+# psql -c "select distinct useragent from testing.audit_event where useragent ilike 'contour%';"
+#+end_src
+
+*** count conformance.test events
+
+#+begin_src tmux :session tmp-gtw:contour :results none
+export PGUSER=apisnoop ; export PGHOST=localhost
+psql -c "select count(*) from testing.audit_event where useragent ilike 'conformance.test%';"
+#+end_src
