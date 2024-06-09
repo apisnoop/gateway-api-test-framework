@@ -4,7 +4,8 @@
 deploy::contour() {
   echo "deploy::contour"
 
-  export CONTOUR_VERSION=${CONTOUR_VERSION:-v1.29.0}
+  export IMPLEMENTATION_VERSION=${IMPLEMENTATION_VERSION:-"v1.29.0"}
+  export CONTOUR_VERSION=${CONTOUR_VERSION:-${IMPLEMENTATION_VERSION}}
   export CONTOUR_IMG=${CONTOUR_E2E_IMAGE:-ghcr.io/projectcontour/contour:${CONTOUR_VERSION}}
   echo "Using Contour image: ${CONTOUR_IMG}"
   echo "Using Contour version: ${CONTOUR_VERSION}"
