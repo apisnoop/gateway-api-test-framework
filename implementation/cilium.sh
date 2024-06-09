@@ -5,13 +5,14 @@ export KIND_DISABLE_CNI="true"
 deploy::cilium() {
   echo "deploy::cilium"
 
+  export IMPLEMENTATION_VERSION=${IMPLEMENTATION_VERSION:-"v1.15.4"}
   check_helm_repo_list=$(helm repo list -ojson | jq -c '.[] | select( .name | contains("cilium"))' | jq -c 'select( .url | contains("https://helm.cilium.io/"))')
   if [[ "${#check_helm_repo_list}" -eq 0 ]] ; then
     helm repo add cilium https://helm.cilium.io
   fi
   echo "Checking helm repo list.... ${check_helm_repo_list}"
 
-  helm upgrade --install cilium cilium/cilium --version 1.15.4 --namespace kube-system --set kubeProxyReplacement=strict --set gatewayAPI.enabled=true
+  helm upgrade --install cilium cilium/cilium --version ${IMPLEMENTATION_VERSION} --namespace kube-system --set kubeProxyReplacement=strict --set gatewayAPI.enabled=true
 }
 
 deploy::cilium::gatewayclass() {
