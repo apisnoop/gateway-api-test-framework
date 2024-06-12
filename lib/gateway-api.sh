@@ -18,7 +18,7 @@ deploy::gateway-api() {
         ;;
 
       "none")
-        echo "No gateway-api implementation requested."
+        echo "No gateway-api channel requested."
         ;;
 
       *)
@@ -30,72 +30,23 @@ deploy::gateway-api() {
 }
 
 deploy::gateway-api::standard::v1.1.0(){
-  deploy::gateway-api::base-crds
-  deploy::gateway-api::grpcroutes
+  kustomize build github.com/kubernetes-sigs/gateway-api//config/crd?ref=v1.1.0 | kubectl apply -f -
+  kubectl wait --for condition=Established crd --all
 }
 
 deploy::gateway-api::standard::v1.0.0(){
-  deploy::gateway-api::base-crds
+  kustomize build github.com/kubernetes-sigs/gateway-api//config/crd?ref=v1.0.0 | kubectl apply -f -
+  kubectl wait --for condition=Established crd --all
 }
 
 deploy::gateway-api::experimental::v1.1.0(){
-  deploy::gateway-api::base-crds
-  deploy::gateway-api::grpcroutes
-  deploy::gateway-api::tlsroutes
-  deploy::gateway-api::tcproutes
-  deploy::gateway-api::udproutes
-  deploy::gateway-api::backendtlspolicies
-  deploy::gateway-api::backendlbpolicies
+  kustomize build github.com/kubernetes-sigs/gateway-api//config/crd?ref=v1.1.0 | kubectl apply -f -
+  kustomize build github.com/kubernetes-sigs/gateway-api//config/crd/experimental?ref=v1.1.0 | kubectl apply -f -
+  kubectl wait --for condition=Established crd --all
 }
 
 deploy::gateway-api::experimental::v1.0.0(){
-  deploy::gateway-api::base-crds
-  deploy::gateway-api::grpcroutes
-  deploy::gateway-api::tlsroutes
-  deploy::gateway-api::tcproutes
-  deploy::gateway-api::udproutes
-  deploy::gateway-api::backendtlspolicies
-}
-
-deploy::gateway-api::base-crds() {
-
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${GATEWAY_API_VERSION}/config/crd/${GATEWAY_API_CHANNEL}/gateway.networking.k8s.io_gatewayclasses.yaml
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${GATEWAY_API_VERSION}/config/crd/${GATEWAY_API_CHANNEL}/gateway.networking.k8s.io_gateways.yaml
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${GATEWAY_API_VERSION}/config/crd/${GATEWAY_API_CHANNEL}/gateway.networking.k8s.io_httproutes.yaml
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${GATEWAY_API_VERSION}/config/crd/${GATEWAY_API_CHANNEL}/gateway.networking.k8s.io_referencegrants.yaml
-
-        kubectl wait --for condition=Established crd/gatewayclasses.gateway.networking.k8s.io --timeout=${TIMEOUT}
-        kubectl wait --for condition=Established crd/gateways.gateway.networking.k8s.io --timeout=${TIMEOUT}
-        kubectl wait --for condition=Established crd/httproutes.gateway.networking.k8s.io --timeout=${TIMEOUT}
-        kubectl wait --for condition=Established crd/referencegrants.gateway.networking.k8s.io --timeout=${TIMEOUT}
-}
-
-deploy::gateway-api::grpcroutes() {
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${GATEWAY_API_VERSION}/config/crd/${GATEWAY_API_CHANNEL}/gateway.networking.k8s.io_grpcroutes.yaml
-        kubectl wait --for condition=Established crd/grpcroutes.gateway.networking.k8s.io --timeout=${TIMEOUT}
-}
-
-deploy::gateway-api::tlsroutes() {
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${GATEWAY_API_VERSION}/config/crd/${GATEWAY_API_CHANNEL}/gateway.networking.k8s.io_tlsroutes.yaml
-        kubectl wait --for condition=Established crd/tlsroutes.gateway.networking.k8s.io --timeout=${TIMEOUT}
-}
-
-deploy::gateway-api::tcproutes() {
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${GATEWAY_API_VERSION}/config/crd/${GATEWAY_API_CHANNEL}/gateway.networking.k8s.io_tcproutes.yaml
-        kubectl wait --for condition=Established crd/tcproutes.gateway.networking.k8s.io --timeout=${TIMEOUT}
-}
-
-deploy::gateway-api::udproutes() {
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${GATEWAY_API_VERSION}/config/crd/${GATEWAY_API_CHANNEL}/gateway.networking.k8s.io_udproutes.yaml
-        kubectl wait --for condition=Established crd/udproutes.gateway.networking.k8s.io --timeout=${TIMEOUT}
-}
-
-deploy::gateway-api::backendtlspolicies() {
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${GATEWAY_API_VERSION}/config/crd/${GATEWAY_API_CHANNEL}/gateway.networking.k8s.io_backendtlspolicies.yaml
-        kubectl wait --for condition=Established crd/backendtlspolicies.gateway.networking.k8s.io --timeout=${TIMEOUT}
-}
-
-deploy::gateway-api::backendlbpolicies() {
-        kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/${GATEWAY_API_VERSION}/config/crd/${GATEWAY_API_CHANNEL}/gateway.networking.k8s.io_backendlbpolicies.yaml
-        kubectl wait --for condition=Established crd/backendlbpolicies.gateway.networking.k8s.io --timeout=${TIMEOUT}
+  kustomize build github.com/kubernetes-sigs/gateway-api//config/crd?ref=v1.0.0 | kubectl apply -f -
+  kustomize build github.com/kubernetes-sigs/gateway-api//config/crd/experimental?ref=v1.0.0 | kubectl apply -f -
+  kubectl wait --for condition=Established crd --all
 }
