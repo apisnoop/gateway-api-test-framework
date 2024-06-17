@@ -43,7 +43,6 @@ run::cilium::conformance() {
   fi
   pushd repos/cilium || exit 1
 
-  SUPPORTED_FEATURES="Gateway,HTTPRoute,HTTPRouteDestinationPortMatching,HTTPRouteHostRewrite,HTTPRouteMethodMatching,HTTPRoutePathRedirect,HTTPRoutePathRewrite,HTTPRoutePortRedirect,HTTPRouteQueryParamMatching,HTTPRouteRequestMirror,HTTPRouteRequestMultipleMirrors,HTTPRouteResponseHeaderModification,HTTPRouteSchemeRedirect,ReferenceGrant,TLSRoute"
   SKIP_TESTS=""
   CURRENT_DATE_TIME=$(date +"%Y%m%d-%H%M")
   REPORT="/tmp/conformance-suite-report-${CURRENT_DATE_TIME}-cilium.log"
@@ -52,15 +51,16 @@ run::cilium::conformance() {
     -p 4 \
     -v ./operator/pkg/gateway-api \
     --gateway-class cilium \
-    --supported-features "${SUPPORTED_FEATURES}" \
+    --all-features \
     --report-output=${REPORT} \
     --organization=cilium \
     --project=cilium \
     --url=https://github.com/cilium/cilium \
-    --version=0.15.4 \
+    --version="$IMPLEMENTATION_VERSION" \
     --contact='https://github.com/cilium/community/blob/main/roles/Maintainers.md' \
     -test.run "TestConformance" \
-    -test.skip "${SKIP_TESTS}"
+    -test.skip "${SKIP_TESTS}" \
+    --conformance-profiles GATEWAY-HTTP,GATEWAY-TLS,GATEWAY-GRPC,MESH-HTTP,MESH-GRPC
 
   popd || exit
 
