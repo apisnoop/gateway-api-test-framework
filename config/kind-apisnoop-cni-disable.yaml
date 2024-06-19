@@ -13,6 +13,7 @@ kubeadmConfigPatches:
 networking:
   # the default CNI will not be installed
   disableDefaultCNI: true
+  kubeProxyMode: "none"
 nodes:
   - role: control-plane
     extraMounts:
