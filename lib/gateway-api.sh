@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-
 deploy::gateway-api() {
   if [[ ${IMPLEMENTATION} != "none" ]] ; then
     echo "deploy::gateway-api"
@@ -30,23 +29,25 @@ deploy::gateway-api() {
 }
 
 deploy::gateway-api::standard::v1.1.0(){
-  kustomize build github.com/kubernetes-sigs/gateway-api//config/crd?ref=v1.1.0 | kubectl apply -f -
+  cd "$(git rev-parse --show-toplevel)"
+  kustomize build ./lib/gateway-api/v1.1.0/standard | kubectl apply -f -
   kubectl wait --for condition=Established crd --all
 }
 
 deploy::gateway-api::standard::v1.0.0(){
-  kustomize build github.com/kubernetes-sigs/gateway-api//config/crd?ref=v1.0.0 | kubectl apply -f -
+  cd "$(git rev-parse --show-toplevel)"
+  kustomize build ./lib/gateway-api/v1.0.0/standard | kubectl apply -f -
   kubectl wait --for condition=Established crd --all
 }
 
 deploy::gateway-api::experimental::v1.1.0(){
-  kustomize build github.com/kubernetes-sigs/gateway-api//config/crd?ref=v1.1.0 | kubectl apply -f -
-  kustomize build github.com/kubernetes-sigs/gateway-api//config/crd/experimental?ref=v1.1.0 | kubectl apply -f -
+  cd "$(git rev-parse --show-toplevel)"
+  kustomize build ./lib/gateway-api/v1.1.0/experimental | kubectl apply -f -
   kubectl wait --for condition=Established crd --all
 }
 
 deploy::gateway-api::experimental::v1.0.0(){
-  kustomize build github.com/kubernetes-sigs/gateway-api//config/crd?ref=v1.0.0 | kubectl apply -f -
-  kustomize build github.com/kubernetes-sigs/gateway-api//config/crd/experimental?ref=v1.0.0 | kubectl apply -f -
+  cd "$(git rev-parse --show-toplevel)"
+  kustomize build ./lib/gateway-api/v1.0.0/experimental | kubectl apply -f -
   kubectl wait --for condition=Established crd --all
 }
