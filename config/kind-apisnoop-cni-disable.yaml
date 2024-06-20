@@ -8,8 +8,14 @@ kubeadmConfigPatches:
       name: config
     apiServer:
       extraArgs:
-        "audit-webhook-config-file": "/etc/kubernetes/pki/audit/sink.yaml"
-        "audit-policy-file": "/etc/kubernetes/pki/audit/policy.yaml"
+        "audit-webhook-config-file": "/etc/kubernetes/policies/sink.yaml"
+        "audit-policy-file": "/etc/kubernetes/policies/policy.yaml"
+      extraVolumes:
+        - name: audit-policies
+          hostPath: /etc/kubernetes/policies
+          mountPath: /etc/kubernetes/policies
+          readOnly: true
+          pathType: "DirectoryOrCreate"
 networking:
   # the default CNI will not be installed
   disableDefaultCNI: true
@@ -18,7 +24,7 @@ nodes:
   - role: control-plane
     extraMounts:
       - hostPath: audit
-        containerPath: /etc/kubernetes/pki/audit
+        containerPath: /etc/kubernetes/policies
         readOnly: True
       - hostPath: manifests/apisnoop.yaml
         containerPath: /etc/kubernetes/manifests/apisnoop.yaml
