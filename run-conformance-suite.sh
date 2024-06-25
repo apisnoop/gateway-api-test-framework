@@ -16,4 +16,6 @@ fi
 export IMPLEMENTATION_REPO_PATH=${IMPLEMENTATION_REPO_PATH:-"${PWD}/repos/${IMPLEMENTATION}"}
 source "./lib/init.sh"
 
+export GATEWAY_API_VERSION="${GATEWAY_API_VERSION:-v1.1.0}"
+
 run::${IMPLEMENTATION}::conformance
