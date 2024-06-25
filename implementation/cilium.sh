@@ -50,24 +50,45 @@ run::cilium::conformance() {
   fi
   pushd repos/cilium || exit 1
 
-  SKIP_TESTS=""
+  git checkout ${IMPLEMENTATION_VERSION}
+
+  case ${GATEWAY_API_VERSION} in
+
+    "v1.0.0")
+      SUPPORTED_FEATURES="Gateway,HTTPRoute,HTTPRouteDestinationPortMatching,HTTPRouteHostRewrite,HTTPRouteMethodMatching,HTTPRoutePathRedirect,HTTPRoutePathRewrite,HTTPRoutePortRedirect,HTTPRouteQueryParamMatching,HTTPRouteRequestMirror,HTTPRouteRequestMultipleMirrors,HTTPRouteResponseHeaderModification,HTTPRouteSchemeRedirect,ReferenceGrant,TLSRoute"
+      EXEMPT_FEATURES="GRPCRoute,GatewayPort8080,GatewayStaticAddresses,HTTPRouteParentRefPort,GRPCExactMethodMatching,HTTPRouteBackendProtocolH2C,HTTPRouteBackendProtocolWebSocket"
+      ;;
+
+    "v1.1.0")
+      CONFORMANCE_PROFILES="HTTP,TLS"
+      SUPPORTED_FEATURES="ReferenceGrant,HTTPRoute,TLSRoute,HTTPRouteQueryParamMatching,HTTPRouteMethodMatching,GatewayClassObservedGenerationBump,HTTPRouteHostRewrite,HTTPRoutePathRewrite,HTTPRouteSchemeRedirect,HTTPRoutePathRedirect,HTTPRoutePortRedirect,HTTPRouteRequestMirror,HTTPRouteRequestMultipleMirrors"
+      ;;
+
+    *)
+      echo "Error: GATEWAY_API_VERSION: ${GATEWAY_API_VERSION} unknown, exiting"
+      exit 1
+      ;;
+  esac
+
   CURRENT_DATE_TIME=$(date +"%Y%m%d-%H%M")
-  REPORT="/tmp/conformance-suite-report-${CURRENT_DATE_TIME}-cilium.log"
+  REPORT="/tmp/conformance-suite-report-${CURRENT_DATE_TIME}-cilium.yaml"
 
   GATEWAY_API_CONFORMANCE_TESTS=1 go test \
     -p 4 \
     -v ./operator/pkg/gateway-api \
     --gateway-class cilium \
-    --all-features \
     --report-output=${REPORT} \
     --organization=cilium \
     --project=cilium \
     --url=https://github.com/cilium/cilium \
     --version="$IMPLEMENTATION_VERSION" \
     --contact='https://github.com/cilium/community/blob/main/roles/Maintainers.md' \
+    --supported-features="${SUPPORTED_FEATURES:-""}" \
+    --exempt-features="${EXEMPT_FEATURES:-""}" \
+    --conformance-profiles="${CONFORMANCE_PROFILES:-""}" \
     -test.run "TestConformance" \
-    -test.skip "${SKIP_TESTS}" \
-    --conformance-profiles GATEWAY-HTTP,GATEWAY-TLS,GATEWAY-GRPC,MESH-HTTP,MESH-GRPC
+    -test.skip "${SKIP_TESTS:-""}" \
+    ${ALL_FEATURES:-""}
 
   popd || exit
 
