@@ -19,10 +19,7 @@ nodes:
       - hostPath: audit
         containerPath: /etc/kubernetes/pki/audit
         readOnly: True
-      - hostPath: manifests/apisnoop.yaml
-        containerPath: /etc/kubernetes/manifests/apisnoop.yaml
-        readOnly: True
     extraPortMappings:
-      - containerPort: 5432
+      - containerPort: 30432
         hostPort: 5432
   - role: worker
