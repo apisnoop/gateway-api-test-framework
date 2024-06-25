@@ -6,11 +6,18 @@ deploy::kind() {
   echo "deploy::kind"
   config::kind::config
 
+  if kind::cluster::exists "${KIND_NET}" ; then
+      echo "cluster \"${KIND_NET}\" already exists"
+      exit 2
+  fi
+
   cd $(dirname ${KIND_CONFIG}) || exit
   kind create cluster --config=${KIND_CONFIG} --image=${KIND_IMAGE}
   cd - || exit
-}
 
+  # Print the k8s version for verification
+  kubectl version
+}
 
 config::kind::config() {
 
@@ -57,4 +64,8 @@ check::kind::cni() {
 
   # wait until coredns is running
   kubectl -n kube-system wait --for=condition=Ready --selector="k8s-app=kube-dns" --timeout=600s pod
+}
+
+kind::cluster::exists() {
+  kind get clusters | grep -q "$1"
 }
