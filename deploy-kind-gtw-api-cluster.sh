@@ -29,6 +29,7 @@ echo "CONFIG_DIR: ${CONFIG_DIR}"
 source "./lib/init.sh"
 
 deploy::kind
+[ ! "$ENABLE_APISNOOP" = "true" ] || deploy::apisnoop
 deploy::gateway-api
 check::kind::cni
 deploy::metallb
