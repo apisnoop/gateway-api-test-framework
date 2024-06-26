@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
+export IMPLEMENTATION_VERSION="${IMPLEMENTATION_VERSION:-v1.29.0}"
+export GATEWAY_API_VERSION="${GATEWAY_API_VERSION:-v1.1.0}"
 
 deploy::contour() {
   echo "deploy::contour"
 
-  export IMPLEMENTATION_VERSION=${IMPLEMENTATION_VERSION:-"v1.29.0"}
   export CONTOUR_VERSION=${CONTOUR_VERSION:-${IMPLEMENTATION_VERSION}}
   export CONTOUR_IMG=${CONTOUR_E2E_IMAGE:-ghcr.io/projectcontour/contour:${CONTOUR_VERSION}}
   echo "Using Contour image: ${CONTOUR_IMG}"
   echo "Using Contour version: ${CONTOUR_VERSION}"
-  echo "Using Gateway API version: ${GATEWAY_API_VERSION}"
+  echo "Using Gateway API version: ${GATEWAY_API_VERSION:-v1.0.0}"
 
   kubectl apply -f https://raw.githubusercontent.com/projectcontour/contour/${CONTOUR_VERSION}/examples/gateway-provisioner/00-common.yaml
   kubectl apply -f https://raw.githubusercontent.com/projectcontour/contour/${CONTOUR_VERSION}/examples/gateway-provisioner/01-roles.yaml
@@ -54,7 +55,7 @@ run::contour::gateway-api-conformance() {
   fi
   pushd repos/gateway-api/conformance || exit 1
 
-  git checkout ${GATEWAY_API_VERSION}
+  git checkout "${GATEWAY_API_VERSION:-v1.0.0}"
 
   SUPPORTED_FEATURES="Gateway,HTTPRoute"
   SKIP_TESTS="Mesh"

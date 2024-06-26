@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 export IMPLEMENTATION_VERSION=${IMPLEMENTATION_VERSION:-"1.22.1"}
+export GATEWAY_API_VERSION="${GATEWAY_API_VERSION:-v1.1.0}"
 
 deploy::istio() {
   echo "deploy::istio"
