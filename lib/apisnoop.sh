@@ -3,7 +3,7 @@
 deploy::apisnoop() {
     echo "deploy::apisnoop"
 
-    APISNOOP_IMAGE_TAG="${APISNOOP_VERSION:-v20240623-auditlogger-1.2.11-68-g854618f}"
+    APISNOOP_IMAGE_TAG="${APISNOOP_VERSION:-v20240626-auditlogger-1.2.12-4-g80e96ac}"
 
     helm repo add --force-update apisnoop https://kubernetes-sigs.github.io/apisnoop
 
