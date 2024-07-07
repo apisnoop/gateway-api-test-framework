@@ -49,7 +49,7 @@ run::contour::gateway-api-conformance() {
 
     mkdir -p repos
     cd $_ || exit
-    git clone https://github.com/kubernetes-sigs/gateway-api.git
+    git clone https://github.com/kubernetes-sigs/gateway-api.git || true
     cd - || exit
   fi
   pushd repos/gateway-api/conformance || exit 1
