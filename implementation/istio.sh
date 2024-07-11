@@ -28,39 +28,34 @@ EOF
 run::istio::conformance() {
   echo "run::istio::conformance"
 
-  if [[ ! -d ${IMPLEMENTATION_REPO_PATH} ]]; then
-    echo "IMPLEMENTATION_REPO_PATH: ${IMPLEMENTATION_REPO_PATH}"
-    echo "Repo for \"${IMPLEMENTATION}\" doesn't exists, cloning repo"
-
-    mkdir -p repos
-    cd $_ || exit
-    git clone https://github.com/istio/istio.git
-    cd - || exit
-  fi
-  pushd repos/istio || exit 1
-  git fetch --tags -a
-  git checkout "$IMPLEMENTATION_VERSION"
+  mkdir -p repos
+  cd $_ || exit
+  [ -d "gateway-api-${GATEWAY_API_VERSION}" ] || git clone https://github.com/kubernetes-sigs/gateway-api.git gateway-api-"${GATEWAY_API_VERSION}"
+  cd - || exit
+  pushd repos/gateway-api-"${GATEWAY_API_VERSION}" || exit 1
+  git reset --hard HEAD
+  git checkout "${GATEWAY_API_VERSION}"
+  git apply ../../lib/gateway-api-"${GATEWAY_API_VERSION}"-useragent.patch
 
   SUPPORTED_FEATURES="Gateway,HTTPRoute,HTTPRouteDestinationPortMatching,HTTPRouteHostRewrite,HTTPRouteMethodMatching,HTTPRoutePathRedirect,HTTPRoutePathRewrite,HTTPRoutePortRedirect,HTTPRouteQueryParamMatching,HTTPRouteRequestMirror,HTTPRouteRequestMultipleMirrors,HTTPRouteResponseHeaderModification,HTTPRouteSchemeRedirect,ReferenceGrant,TLSRoute"
   SKIP_TESTS=""
   CURRENT_DATE_TIME=$(date +"%Y%m%d-%H%M")
   REPORT="/tmp/conformance-suite-report-${CURRENT_DATE_TIME}-istio.yaml"
 
-  go test \
-    -v -timeout 60m \
-    -run TestGatewayConformance \
-    -skip "$SKIP_TESTS" \
-    ./tests/integration/pilot \
-    -tags=integ \
-    --gateway-class=istio \
-    --all-features \
-    --contact='@istio/maintainers' \
-    --version="$IMPLEMENTATION_VERSION" \
-    --report-output="$REPORT" \
-    --url="https://istio.io" \
-    --project=istio \
+  GATEWAY_API_CONFORMANCE_TESTS=1 go test \
+    -p 4 \
+    ./conformance/ \
+    --gateway-class istio \
+    --supported-features "${SUPPORTED_FEATURES:-}" \
+    --report-output=${REPORT} \
     --organization=istio \
-    --supported-features="$SUPPORTED_FEATURES"
+    --project=istio \
+    --url=https://istio.io/ \
+    --version="$IMPLEMENTATION_VERSION" \
+    --contact='@istio/maintainers' \
+    -test.run "TestConformance" \
+    -test.skip "${SKIP_TESTS:-}" \
+    -test.v 10
 
   popd || exit
 

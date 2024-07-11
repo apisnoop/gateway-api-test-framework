@@ -1,0 +1,86 @@
+diff --git a/conformance/conformance_test.go b/conformance/conformance_test.go
+index bbd65634..9ec86970 100644
+--- a/conformance/conformance_test.go
++++ b/conformance/conformance_test.go
+@@ -38,6 +38,7 @@ func TestConformance(t *testing.T) {
+ 	if err != nil {
+ 		t.Fatalf("Error loading Kubernetes config: %v", err)
+ 	}
++	cfg.UserAgent = "gateway-api-conformance.test::v1.0.0::unknownTest::unknownFeature"
+ 	client, err := client.New(cfg, client.Options{})
+ 	if err != nil {
+ 		t.Fatalf("Error initializing Kubernetes client: %v", err)
+diff --git a/conformance/utils/suite/suite.go b/conformance/utils/suite/suite.go
+index 58a55624..be8e1c8f 100644
+--- a/conformance/utils/suite/suite.go
++++ b/conformance/utils/suite/suite.go
+@@ -21,10 +21,12 @@ import (
+ 	"strings"
+ 	"testing"
+ 
++	"github.com/stretchr/testify/require"
+ 	"k8s.io/apimachinery/pkg/util/sets"
+ 	clientset "k8s.io/client-go/kubernetes"
+ 	"k8s.io/client-go/rest"
+ 	"sigs.k8s.io/controller-runtime/pkg/client"
++	clicfg "sigs.k8s.io/controller-runtime/pkg/client/config"
+ 
+ 	"sigs.k8s.io/gateway-api/apis/v1beta1"
+ 	"sigs.k8s.io/gateway-api/conformance"
+@@ -157,6 +159,10 @@ func New(s Options) *ConformanceTestSuite {
+ 	return suite
+ }
+ 
++const (
++	testSuiteUserAgentPrefix = "gateway-api-conformance.test"
++)
++
+ // Setup ensures the base resources required for conformance tests are installed
+ // in the cluster. It also ensures that all relevant resources are ready.
+ func (suite *ConformanceTestSuite) Setup(t *testing.T) {
+@@ -206,10 +212,45 @@ func (suite *ConformanceTestSuite) Setup(t *testing.T) {
+ 	}
+ }
+ 
++func (suite *ConformanceTestSuite) setClientsetForTest(test ConformanceTest) error {
++	cfg, err := clicfg.GetConfig()
++	if err != nil {
++		return err
++	}
++	featureNames := []string{}
++	for _, v := range test.Features {
++		featureNames = append(featureNames, string(v))
++	}
++	if len(test.Features) == 0 {
++		featureNames = []string{"unknownFeature"}
++	}
++	cfg.UserAgent = strings.Join(
++		[]string{
++			testSuiteUserAgentPrefix,
++			"v1.0.0", // NOTE version not exported in v1.0.0
++			test.ShortName,
++			strings.Join(featureNames, ","),
++		},
++		"::")
++	client, err := client.New(cfg, client.Options{})
++	if err != nil {
++		return err
++	}
++	clientset, err := clientset.NewForConfig(cfg)
++	if err != nil {
++		return err
++	}
++	suite.Client = client
++	suite.Clientset = clientset
++	return nil
++}
++
+ // Run runs the provided set of conformance tests.
+ func (suite *ConformanceTestSuite) Run(t *testing.T, tests []ConformanceTest) {
+ 	for _, test := range tests {
+ 		t.Run(test.ShortName, func(t *testing.T) {
++			err := suite.setClientsetForTest(test)
++			require.NoError(t, err, "failed to create new clientset for test")
+ 			test.Run(t, suite)
+ 		})
+ 	}
