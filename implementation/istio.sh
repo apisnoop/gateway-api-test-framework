@@ -5,6 +5,11 @@ export IMPLEMENTATION_VERSION=${IMPLEMENTATION_VERSION:-"1.22.1"}
 deploy::istio() {
   echo "deploy::istio"
 
+  check_helm_repo_list=$(helm repo list -ojson | jq -c '.[] | select( .name | contains("istio"))' | jq -c 'select( .url | contains("https://istio-release.storage.googleapis.com/charts"))')
+  if [[ "${#check_helm_repo_list}" -eq 0 ]] ; then
+    helm repo add istio https://istio-release.storage.googleapis.com/charts
+  fi
+
   kubectl create ns istio-system
   helm install istio-base istio/base -n istio-system --set defaultRevision=default --version "${IMPLEMENTATION_VERSION}"
   helm install istiod istio/istiod -n istio-system --version "${IMPLEMENTATION_VERSION}" --wait
