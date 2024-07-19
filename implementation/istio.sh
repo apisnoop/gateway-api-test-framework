@@ -5,7 +5,9 @@ export IMPLEMENTATION_VERSION=${IMPLEMENTATION_VERSION:-"1.22.1"}
 deploy::istio() {
   echo "deploy::istio"
 
-  istioctl install --set profile=minimal --set tag="${IMPLEMENTATION_VERSION}" --skip-confirmation
+  kubectl create ns istio-system
+  helm install istio-base istio/base -n istio-system --set defaultRevision=default --version "${IMPLEMENTATION_VERSION}"
+  helm install istiod istio/istiod -n istio-system --version "${IMPLEMENTATION_VERSION}" --wait
 
   cat << EOF | kubectl apply -f -
 apiVersion: gateway.networking.k8s.io/v1beta1
