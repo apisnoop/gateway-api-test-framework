@@ -92,6 +92,5 @@ run::cilium::conformance() {
 
   popd || exit
 
-  echo -e "\n\nConformance Suite completed.\n${IMPLEMENTATION} report saved: ${REPORT}.\n\n"
-  cat "${REPORT}"
+  print::report
 }
