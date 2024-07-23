@@ -39,18 +39,14 @@ EOF
 run::cilium::conformance() {
   echo "run::cilium::conformance"
 
-  if [[ ! -d ${IMPLEMENTATION_REPO_PATH} ]]; then
-    echo "IMPLEMENTATION_REPO_PATH: ${IMPLEMENTATION_REPO_PATH}"
-    echo "Repo for \"${IMPLEMENTATION}\" doesn't exists, cloning repo"
-
-    mkdir -p repos
-    cd $_ || exit
-    git clone https://github.com/cilium/cilium.git
-    cd - || exit
-  fi
-  pushd repos/cilium || exit 1
-
-  git checkout ${IMPLEMENTATION_VERSION}
+  mkdir -p repos
+  cd $_ || exit
+  [ -d "gateway-api-${GATEWAY_API_VERSION}" ] || git clone https://github.com/kubernetes-sigs/gateway-api.git gateway-api-"${GATEWAY_API_VERSION}"
+  cd - || exit
+  pushd repos/gateway-api-"${GATEWAY_API_VERSION}" || exit 1
+  git reset --hard HEAD
+  git checkout "${GATEWAY_API_VERSION}"
+  git apply ../../lib/gateway-api-"${GATEWAY_API_VERSION}"-useragent.patch
 
   case ${GATEWAY_API_VERSION} in
 
@@ -60,8 +56,8 @@ run::cilium::conformance() {
       ;;
 
     "v1.1.0")
-      CONFORMANCE_PROFILES="HTTP,TLS"
-      SUPPORTED_FEATURES="ReferenceGrant,HTTPRoute,TLSRoute,HTTPRouteQueryParamMatching,HTTPRouteMethodMatching,GatewayClassObservedGenerationBump,HTTPRouteHostRewrite,HTTPRoutePathRewrite,HTTPRouteSchemeRedirect,HTTPRoutePathRedirect,HTTPRoutePortRedirect,HTTPRouteRequestMirror,HTTPRouteRequestMultipleMirrors"
+      CONFORMANCE_PROFILES="GATEWAY-HTTP,GATEWAY-TLS"
+      EXEMPT_FEATURES="GatewayStaticAddresses,HTTPRouteParentRefPort,MeshConsumerRoute"
       ;;
 
     *)
@@ -75,20 +71,20 @@ run::cilium::conformance() {
 
   GATEWAY_API_CONFORMANCE_TESTS=1 go test \
     -p 4 \
-    -v ./operator/pkg/gateway-api \
+    ./conformance/ \
     --gateway-class cilium \
+    --supported-features "${SUPPORTED_FEATURES:-}" \
+    --exempt-features="${EXEMPT_FEATURES:-""}" \
+    --conformance-profiles="${CONFORMANCE_PROFILES:-""}" \
     --report-output=${REPORT} \
     --organization=cilium \
     --project=cilium \
-    --url=https://github.com/cilium/cilium \
-    --version="$IMPLEMENTATION_VERSION" \
-    --contact='https://github.com/cilium/community/blob/main/roles/Maintainers.md' \
-    --supported-features="${SUPPORTED_FEATURES:-""}" \
-    --exempt-features="${EXEMPT_FEATURES:-""}" \
-    --conformance-profiles="${CONFORMANCE_PROFILES:-""}" \
+    --url=https://cilium.io/ \
+    --version="${IMPLEMENTATION_VERSION}" \
+    --contact='@cilium/maintainers' \
     -test.run "TestConformance" \
-    -test.skip "${SKIP_TESTS:-""}" \
-    ${ALL_FEATURES:-""}
+    -test.skip "${SKIP_TESTS:-}" \
+    -test.v 10
 
   popd || exit
 
