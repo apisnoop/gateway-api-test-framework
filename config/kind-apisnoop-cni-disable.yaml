@@ -6,16 +6,30 @@ kubeadmConfigPatches:
     kind: ClusterConfiguration
     metadata:
       name: config
+    controllerManager:
+      extraArgs:
+        cloud-provider: "external"
     apiServer:
       extraArgs:
         "audit-webhook-config-file": "/etc/kubernetes/policies/sink.yaml"
         "audit-policy-file": "/etc/kubernetes/policies/policy.yaml"
+        cloud-provider: "external"
       extraVolumes:
         - name: audit-policies
           hostPath: /etc/kubernetes/policies
           mountPath: /etc/kubernetes/policies
           readOnly: true
           pathType: "DirectoryOrCreate"
+    ---
+    kind: InitConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        cloud-provider: "external"
+    ---
+    kind: JoinConfiguration
+    nodeRegistration:
+      kubeletExtraArgs:
+        cloud-provider: "external"
 networking:
   # the default CNI will not be installed
   disableDefaultCNI: true
