@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
+export IMPLEMENTATION_VERSION=${IMPLEMENTATION_VERSION:-"v1.0.1"}
+export GATEWAY_API_VERSION="${GATEWAY_API_VERSION:-v1.1.0}"
 
 deploy::envoy-gateway() {
   echo "deploy::envoy-gateway"
 
-  export IMPLEMENTATION_VERSION=${IMPLEMENTATION_VERSION:-"v1.0.1"}
   helm install eg oci://docker.io/envoyproxy/gateway-helm --version ${IMPLEMENTATION_VERSION} -n envoy-gateway-system --create-namespace
   kubectl -n envoy-gateway-system wait --for=condition=Ready --selector="control-plane=envoy-gateway" --timeout=120s pod
 

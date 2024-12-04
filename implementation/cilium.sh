@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
 export KIND_DISABLE_CNI="true"
+export GATEWAY_API_VERSION="${GATEWAY_API_VERSION:-v1.1.0}"
 
+export IMPLEMENTATION_VERSION=${IMPLEMENTATION_VERSION:-"v1.15.4"}
 deploy::cilium() {
   echo "deploy::cilium"
 
-  export IMPLEMENTATION_VERSION=${IMPLEMENTATION_VERSION:-"v1.15.4"}
   export API_SERVER_IP=$(kubectl get nodes  -owide | grep control-plane | awk '{print $6}')
   check_helm_repo_list=$(helm repo list -ojson | jq -c '.[] | select( .name | contains("cilium"))' | jq -c 'select( .url | contains("https://helm.cilium.io/"))')
   if [[ "${#check_helm_repo_list}" -eq 0 ]] ; then
@@ -49,6 +50,8 @@ run::cilium::conformance() {
     cd - || exit
   fi
   pushd repos/cilium || exit 1
+  git fetch --tags -a
+  git checkout "$IMPLEMENTATION_VERSION"
 
   git checkout ${IMPLEMENTATION_VERSION}
 
